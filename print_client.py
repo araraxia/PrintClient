@@ -26,6 +26,7 @@ class PrintClient:
                     page_height=3,  # Default height in inches
                     raster_dpi=202,  # Default DPI
                     doc_name=pdf_file.filename or "PDF Document",
+                    rotate=True,  # Rotate pages if needed
                 )
             
             data = request.get_json()

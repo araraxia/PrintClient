@@ -96,6 +96,7 @@ class printerHandler:
             page_height (float): The height of the page in inches.
             raster_dpi (int): The DPI for rasterizing the PDF pages. Default is 202.
             doc_name (str): The name of the document to print.
+            rotate_pages (bool): Whether to rotate the pages before printing. Default is False.
         """
         images = convert_from_bytes(
             pdf_file_io,
