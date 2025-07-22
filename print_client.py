@@ -1,24 +1,25 @@
-from flask import Flask, request, jsonifty
+from flask import Flask, request, jsonify
 from waitress import serve
 from print import printerHandler
-from io import BytesIO
+import uuid, os
 
 
 class PrintClient:
     def __init__(self):
         self.app = Flask(__name__)
+        self.root_dir = os.path.dirname(os.path.abspath(__file__))
 
         @self.app.route("/print", methods=["POST"])
-        def print_message():
+        def print_message():        # Expand to support printing any file type eventually!!
             if 'pdf' not in request.files:
-                return jsonifty({"error": "No PDF file provided"}), 400
+                return jsonify({"error": "No PDF file provided"}), 400
             pdf_file = request.files['pdf']
 
             print_handler = printerHandler(
-                printer_name="Westinghouse WHTP203e",
-                poppler_path="/usr/bin/poppler"  # Adjust the path as needed
+                printer_name="Westinghouse_WHTP203e",
             )
             
+            '''
             with BytesIO(pdf_file.read()) as pdf_file_io:
                 print_handler.print_pdf_io(
                     pdf_file_io=pdf_file_io,
@@ -28,14 +29,23 @@ class PrintClient:
                     doc_name=pdf_file.filename or "PDF Document",
                     rotate=True,  # Rotate pages if needed
                 )
+            '''
+            tmp_file_name = f"{uuid.uuid4().hex}.pdf"
+            pdf_file_path = os.path.join(self.root_dir, "tmp", tmp_file_name)
+            pdf_file.save(pdf_file_path)
             
-            data = request.get_json()
-            if not data or "message" not in data:
-                return jsonifty({"error": "No message provided"}), 400
+            try:
+                print_handler.print_file(
+                    pdf_file_path=pdf_file_path,
+                    page_width=2,  # Media width in inches
+                    page_height=3,  # Media height in inches
+                    raster_dpi=202,  # Default DPI
+                    rotate_pages=True,  # Rotate the content of the PDF
+                )
+            except Exception as e:
+                return jsonify({"error": str(e), "traceback": e.__traceback__}), 500
 
-            message = data["message"]
-            print(message)
-            return jsonifty({"status": "Message printed successfully"}), 200
+
 
 
 if __name__ == "__main__":
