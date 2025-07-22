@@ -44,6 +44,7 @@ class PrintClient:
                 )
             except Exception as e:
                 return jsonify({"error": str(e), "traceback": e.__traceback__}), 500
+            return jsonify({"message": "Print job submitted successfully"}), 200
 
 
 
