@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, request, jsonify
 from waitress import serve
 from print import printerHandler
@@ -8,6 +10,9 @@ class PrintClient:
     def __init__(self):
         self.app = Flask(__name__)
         self.root_dir = os.path.dirname(os.path.abspath(__file__))
+        self.temp_dir = os.path.join(self.root_dir, "tmp")    
+        if not os.path.exists(self.temp_dir):
+            os.makedirs(self.temp_dir)
 
         @self.app.route("/print", methods=["POST"])
         def print_message():        # Expand to support printing any file type eventually!!
@@ -31,7 +36,7 @@ class PrintClient:
                 )
             '''
             tmp_file_name = f"{uuid.uuid4().hex}.pdf"
-            pdf_file_path = os.path.join(self.root_dir, "tmp", tmp_file_name)
+            pdf_file_path = os.path.join(self.temp_dir, tmp_file_name)
             pdf_file.save(pdf_file_path)
             
             try:
@@ -43,7 +48,12 @@ class PrintClient:
                     rotate_pages=True,  # Rotate the content of the PDF
                 )
             except Exception as e:
+                print(f"Error printing PDF: {e}")
                 return jsonify({"error": str(e), "traceback": e.__traceback__}), 500
+            finally:
+                if os.path.exists(pdf_file_path):
+                    os.remove(pdf_file_path)
+                    
             return jsonify({"message": "Print job submitted successfully"}), 200
 
 
