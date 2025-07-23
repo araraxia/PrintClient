@@ -41,7 +41,7 @@ class PrintClient:
             tmp_file_name = f"{uuid.uuid4().hex}.pdf"
             pdf_file_path = os.path.join(self.temp_dir, tmp_file_name)
             print(f"Saving PDF file to temporary path: {pdf_file_path}")
-            pdf_file.save(pdf_file_path)
+            pdf_file.save(dst=pdf_file_path)
             print(f"PDF file saved successfully: {pdf_file_path}")
             
             try:
